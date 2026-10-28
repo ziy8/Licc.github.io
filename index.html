@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>链接生成工具 · 代金券 + 进店</title>
+<style>
+  :root{
+    --bg:#f4f5f7;
+    --card:#ffffff;
+    --line:#e8eaef;
+    --text:#1d2126;
+    --sub:#767e8a;
+    --hint:#9aa2ad;
+    --shadow:0 4px 20px rgba(18,26,40,.06);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;
+    background:var(--bg);color:var(--text);
+    padding:16px 12px 36px;font-size:15px;line-height:1.6;
+  }
+  .wrap{max-width:640px;margin:0 auto}
+
+  .hd{padding:6px 4px 14px}
+  .hd h1{margin:0 0 4px;font-size:19px;font-weight:700;letter-spacing:.2px}
+  .hd p{margin:0;font-size:12.5px;color:var(--sub)}
+
+  .card{background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:15px;margin-bottom:12px}
+
+  .label{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .label .n{width:18px;height:18px;flex:none;border-radius:6px;background:linear-gradient(135deg,#ffd83d,#ffa600);
+    display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#241a00}
+  .label .t{font-size:13px;font-weight:600;color:var(--sub)}
+  .label .r{margin-left:auto;font-size:11px;color:#8a6a00;background:#fff6e0;border-radius:999px;padding:2px 8px;font-weight:600}
+
+  textarea{
+    width:100%;min-height:92px;resize:vertical;border:1px solid var(--line);border-radius:12px;
+    background:#fafbfc;padding:11px 12px;font-size:13.5px;line-height:1.65;color:var(--text);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"PingFang SC",monospace;
+    outline:none;word-break:break-all;transition:border-color .15s,background .15s;
+  }
+  textarea:focus{border-color:#ffcd4d;background:#fff}
+  textarea.bad{border-color:#ffb3b8;background:#fff7f7}
+
+  .tools{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap}
+  .btn{
+    appearance:none;border:0;cursor:pointer;border-radius:11px;font-size:14px;font-weight:600;
+    padding:10px 14px;color:#231a00;background:linear-gradient(135deg,#ffd93d,#ffab00);
+    box-shadow:0 5px 14px rgba(255,171,0,.26);
+    transition:transform .12s ease,box-shadow .12s ease;
+    white-space:nowrap;
+  }
+  .btn:active{transform:translateY(1px);box-shadow:0 3px 8px rgba(255,171,0,.2)}
+  .btn.g{background:#fff;color:var(--text);border:1px solid var(--line);box-shadow:none;font-weight:500}
+  .btn.sm{padding:7px 11px;font-size:12.5px;border-radius:9px;box-shadow:none}
+
+  .warnbar{margin-top:9px;font-size:12.5px;line-height:1.7;border-radius:10px;padding:8px 10px;display:none}
+  .warnbar.on{display:block}
+  .warnbar.warn{color:#9a6a00;background:#fffaf0;border:1px solid #ffe3ad}
+
+  .res{margin-top:10px}
+  .res-head{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--hint);margin-bottom:6px}
+  .res-head b{color:var(--sub);font-weight:600;font-size:12.5px}
+  .res-head .copy{font-size:11px;color:#8a6a00;background:#fff6e0;border-radius:999px;padding:1px 7px}
+  .box{
+    border-radius:12px;background:#f8f9fb;border:1px dashed #dee2e8;padding:10px 11px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:12.5px;line-height:1.7;word-break:break-all;color:#39414d;
+    max-height:150px;overflow:auto;
+  }
+  .box .base{color:#aab1bc}
+  .box .fill{color:#c0392b;font-weight:700}
+  .empty{color:#b9c0ca}
+
+  .ops{display:flex;gap:8px;margin-top:9px}
+  .ops .btn{flex:1}
+
+  .foot{text-align:center;color:var(--hint);font-size:11.5px;line-height:1.9;margin-top:8px}
+
+  .toast{
+    position:fixed;left:50%;bottom:34px;transform:translate(-50%,16px);
+    background:rgba(26,30,38,.93);color:#fff;font-size:13px;padding:8px 15px;border-radius:999px;
+    opacity:0;pointer-events:none;transition:all .2s ease;z-index:99;max-width:86vw;text-align:center;
+  }
+  .toast.on{opacity:1;transform:translate(-50%,0)}
+
+  details.rules{margin-top:11px;border-top:1px dashed var(--line);padding-top:9px}
+  details.rules summary{font-size:12px;color:var(--hint);cursor:pointer;list-style:none;outline:none}
+  details.rules summary::-webkit-details-marker{display:none}
+  details.rules summary:before{content:"▸ ";color:#c2c8d1}
+  details.rules[open] summary:before{content:"▾ "}
+  details.rules .body{font-size:12px;color:var(--sub);line-height:1.85;margin-top:6px}
+  details.rules code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;background:#f4f5f7;padding:1px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hd">
+    <h1>链接生成工具</h1>
+    <p>粘贴页面路径，一键生成「商家代金券」和「进店」两个链接</p>
+  </div>
+
+  <div class="card">
+    <div class="label"><span class="n">1</span><span class="t">粘贴页面路径</span></div>
+    <textarea id="raw" spellcheck="false" placeholder="packages/restaurant/restaurant/restaurant?poi_id=-100&allowance_alliance_scenes=93801100&poi_id_str=lUS0Hf28OU6LWXOth1caCwI"></textarea>
+    <div class="tools">
+      <button class="btn g sm" id="btnPaste">粘贴</button>
+      <button class="btn g sm" id="btnSample">填入示例</button>
+      <button class="btn g sm" id="btnClear">清空</button>
+    </div>
+    <div class="warnbar" id="warn"></div>
+
+    <details class="rules">
+      <summary>拼接规则</summary>
+      <div class="body">
+        <b>链接 1（代金券）</b>——只取 <code>str=</code> 之后的内容，接在<br>
+        <code>http://v2.srdhw.com/ld/go/shengziy.php?poi=</code> 后面。<br><br>
+        <b>链接 2（进店）</b>——取 <code>ant?</code> 之后的内容，接在<br>
+        <code>meituanwaimai://waimai.meituan.com/menu?</code> 后面。<br><br>
+        你的路径是 <code>.../restaurant?poi_id=...</code>，<code>ant?</code> 指的就是这个问号；
+        如果粘贴的内容里找不到 <code>ant?</code>，会自动按第一个 <code>?</code> 截取。
+      </div>
+    </details>
+  </div>
+
+  <div class="card">
+    <div class="label"><span class="n">2</span><span class="t">商家代金券链接</span><span class="r">商家代金券</span></div>
+    <div class="res">
+      <div class="res-head"><b>生成结果</b><span class="copy">str= 之后</span></div>
+      <div class="box" id="out1"><span class="empty">等待输入…</span></div>
+    </div>
+    <div class="ops">
+      <button class="btn" data-copy="1">复制链接</button>
+      <button class="btn g" data-open="1">打开</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="label"><span class="n">3</span><span class="t">进店链接</span><span class="r">津贴已保存</span></div>
+    <div class="res">
+      <div class="res-head"><b>生成结果</b><span class="copy">ant? 之后</span></div>
+      <div class="box" id="out2"><span class="empty">等待输入…</span></div>
+    </div>
+    <div class="ops">
+      <button class="btn" data-copy="2">复制链接</button>
+      <button class="btn g" data-open="2">打开</button>
+    </div>
+  </div>
+
+  <div class="foot">
+    全部在本地浏览器计算，不上传、不联网<br>
+    第二个链接是 App 唤起协议，需在手机上点开
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var BASE1 = 'http://v2.srdhw.com/ld/go/shengziy.php?poi=';
+  var BASE2 = 'meituanwaimai://waimai.meituan.com/menu?';
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  var toastTimer;
+  function toast(msg) {
+    var t = $('toast');
+    t.textContent = msg;
+    t.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('on'); }, 1800);
+  }
+
+  function copyText(text) {
+    if (!text) { toast('还没有生成链接'); return; }
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(function () { toast('已复制'); }, function () { fbCopy(text); });
+    } else { fbCopy(text); }
+  }
+  function fbCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;left:-9999px;top:0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); toast('已复制'); }
+    catch (e) { toast('复制失败，请长按手动选择'); }
+    document.body.removeChild(ta);
+  }
+
+  /* 链接1：只取 str= 之后的那一段 */
+  function pickAfterStr(s) {
+    var i = s.lastIndexOf('str=');
+    if (i < 0) return '';
+    var v = s.slice(i + 4);
+    v = v.replace(/^[?&]+/, '');
+    v = v.split('#')[0];
+    v = v.split('&')[0];
+    return v.trim();
+  }
+
+  /* 链接2：取 ant? 之后；没有则退回第一个 ? */
+  function pickAfterAnt(s) {
+    var i = s.indexOf('ant?');
+    if (i >= 0) return s.slice(i + 4).split('#')[0].trim();
+    var j = s.indexOf('?');
+    if (j >= 0) return s.slice(j + 1).split('#')[0].trim();
+    return '';
+  }
+
+  function current() {
+    var s = ($('raw').value || '').trim();
+    if (!s) return null;
+    return { seg1: pickAfterStr(s), seg2: pickAfterAnt(s) };
+  }
+
+  function esc(t) {
+    return String(t).replace(/[&<>"']/g, function (c) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+    });
+  }
+
+  function renderBox(el, base, seg, emptyMsg) {
+    if (!seg) { el.innerHTML = '<span class="empty">' + emptyMsg + '</span>'; return; }
+    el.innerHTML = '<span class="base">' + esc(base) + '</span><span class="fill">' + esc(seg) + '</span>';
+  }
+
+  function refresh() {
+    var cur = current();
+    var warn = $('warn');
+    warn.className = 'warnbar';
+    warn.textContent = '';
+    $('raw').classList.remove('bad');
+
+    if (!cur) {
+      renderBox($('out1'), BASE1, '', '等待输入…');
+      renderBox($('out2'), BASE2, '', '等待输入…');
+      return;
+    }
+
+    renderBox($('out1'), BASE1, cur.seg1, '没找到 str=，请检查是否粘全');
+    renderBox($('out2'), BASE2, cur.seg2, '没找到 ?，请检查粘贴内容');
+
+    var msgs = [];
+    if (!cur.seg1) { msgs.push('没识别到 <b>str=</b>'); $('raw').classList.add('bad'); }
+    if (!cur.seg2) { msgs.push('没识别到 <b>?</b>'); $('raw').classList.add('bad'); }
+    if (cur.seg1 && !/^[A-Za-z0-9_-]+$/.test(cur.seg1)) {
+      msgs.push('str= 后面还跟着别的参数，已只取第一段');
+    }
+    if (msgs.length) {
+      warn.className = 'warnbar on warn';
+      warn.innerHTML = msgs.join('；') + '。';
+    }
+  }
+
+  $('raw').addEventListener('input', refresh);
+
+  $('btnPaste').addEventListener('click', function () {
+    if (!navigator.clipboard || !navigator.clipboard.readText) {
+      toast('当前环境不支持自动读取，请长按输入框手动粘贴');
+      return;
+    }
+    navigator.clipboard.readText().then(function (t) {
+      $('raw').value = t;
+      refresh();
+      toast('已粘贴');
+    }).catch(function () { toast('读取剪贴板被拒绝，请手动粘贴'); });
+  });
+
+  $('btnSample').addEventListener('click', function () {
+    $('raw').value = 'packages/restaurant/restaurant/restaurant?poi_id=-100&allowance_alliance_scenes=93801100&poi_id_str=lUS0Hf28OU6LWXOth1caCwI';
+    refresh();
+  });
+
+  $('btnClear').addEventListener('click', function () {
+    $('raw').value = '';
+    refresh();
+  });
+
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-copy],[data-open]');
+    if (!t) return;
+    var cur = current();
+    var which = t.getAttribute('data-copy') || t.getAttribute('data-open');
+    var seg = which === '1' ? (cur && cur.seg1) : (cur && cur.seg2);
+    var base = which === '1' ? BASE1 : BASE2;
+    if (!seg) { toast('还没有生成链接'); return; }
+    var full = base + seg;
+    if (t.hasAttribute('data-copy')) copyText(full);
+    else window.open(full, '_blank');
+  });
+
+  refresh();
+})();
+</script>
+</body>
+</html>
